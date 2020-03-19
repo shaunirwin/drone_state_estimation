@@ -1,0 +1,39 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "clang++ build active file",
+            "command": "/usr/bin/clang++",
+            "args": [
+                "-std=c++17",
+                // "-stdlib=libc++",
+                // "-I",
+                // "/home/shaun/my_repos/glfw/deps",
+                // "/home/shaun/my_repos/glfw/deps/glad_gl.c",
+                "-I",
+                "/home/shaun/my_repos/drone_state_estimation/deps",
+                "/home/shaun/my_repos/drone_state_estimation/deps/glad/glad_gl.c",
+                // "-I",
+                // "./deps",
+                // "deps/glad/gl.h",
+                "-l",
+                "glfw",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "/usr/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
