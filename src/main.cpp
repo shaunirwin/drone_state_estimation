@@ -1,26 +1,18 @@
 #include <iostream>
-#include <vector>
 #include <string>
-#include <Eigen/Dense>
-
-using Eigen::MatrixXd;
-
-using namespace std;
+#include "vehicles.h"
 
 int main()
 {
-  MatrixXd m(2,2);
-  m(0,0) = 3;
-  m(1,0) = 2.5;
-  m(0,1) = -1;
-  m(1,1) = m(1,0) + m(0,1);
-  std::cout << m << std::endl;
+    std::cout << "Simulating drone" << std::endl;
 
-  vector<string> msg {"Hello", "C++", "World", "from", "VS Code", "and the C++ extension!"};
+    sim::Drone drone;
 
-  for (const string& word : msg)
+    for (int i = 0; i < 20; i++)
     {
-        cout << word << " ";
+        // increment simulator by one timestep
+        drone.next();
+
+        std::cout << i << "] Position: " << drone.pos << ", Velocity: " << drone.vel << std::endl;
     }
-    cout << endl;
 }
