@@ -1,5 +1,12 @@
 # README
 
+## Overview
+
+This project is for creating a simulation of moving vehicles or objects and using various state estimation techniques to estiamte the vehicle states.
+
+Vehicles currently supported:
+* Drone with 3D position and velocity states that flies in a random walk motion
+
 ## Setup
 
 ~~~
