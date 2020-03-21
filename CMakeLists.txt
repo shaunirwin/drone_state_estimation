@@ -44,20 +44,26 @@ add_executable(DroneStateEstimation main.cpp)
 # target_link_libraries (DroneStateEstimation Eigen3::Eigen dronelib)
 target_link_libraries (DroneStateEstimation dronelib)
 
+target_include_directories(DroneStateEstimation
+    PUBLIC 
+        $<INSTALL_INTERFACE:include>    
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
-#[[
+
 add_executable(UnitTests "")
-target_link_libraries (UnitTests gtest_main)
+target_link_libraries (UnitTests dronelib gtest_main)
 
 target_sources(UnitTests
     PRIVATE
-        unit_tests.cpp 
-        src/sample1.cpp
+        unit_tests.cpp
 )
 # add_test(NAME example_test COMMAND example)
-]]
 
-target_include_directories(DroneStateEstimation
+
+target_include_directories(UnitTests
     PUBLIC 
         $<INSTALL_INTERFACE:include>    
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
