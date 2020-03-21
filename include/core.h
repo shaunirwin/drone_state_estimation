@@ -9,6 +9,7 @@ namespace Core
     typedef Eigen::Vector3f Velocity;   // vehicle velocity states
     
     const double SIMULATION_TIMESTEP = 0.02;    // timestep of the simulation [s]
+    const double SIMULATION_DURATION = 5.;      // length of the simulation [s]
 };
 
 #endif
