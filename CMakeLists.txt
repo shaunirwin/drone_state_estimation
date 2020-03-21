@@ -25,5 +25,8 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 ]]
 
+target_compile_features(DroneStateEstimation PRIVATE cxx_std_17)
+#[[
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+]]
