@@ -16,6 +16,12 @@ cmake .. -DCMAKE_PREFIX_PATH=<path to the cmake build folder of your Eigen insta
 make
 ~~~
 
+## Run simulation
+
+~~~
+./DroneStateEstimation
+~~~
+
 ## Unit tests
 
 To run unit tests:
