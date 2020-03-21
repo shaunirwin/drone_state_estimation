@@ -1,0 +1,5 @@
+name: drone_sim_env
+dependencies:
+  - pip
+  - python=3.7
+  - matplotlib
