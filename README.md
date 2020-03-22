@@ -4,6 +4,8 @@
 
 This project is for creating a simulation of moving vehicles or objects and using various state estimation techniques to estiamte the vehicle states.
 
+Vehicles and state estimation algorithms are implemented in C++ and simulation data is written to binary files for reading in and visualising with Python and Matplotlib.
+
 Vehicles currently supported:
 * Drone with 3D position and velocity states that flies in a random walk motion
 
