@@ -7,7 +7,7 @@ This project is for creating a simulation of moving vehicles or objects and usin
 Vehicles currently supported:
 * Drone with 3D position and velocity states that flies in a random walk motion
 
-See the [documentation](docs/doc.tex) for more information on the vehicle models.
+See the [documentation](docs/docs.tex) for more information on the vehicle models.
 
 ## Setup
 
