@@ -1,0 +1,65 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+
+\begin{document}
+
+\title{Documentation for Drone State Estimation}
+\author{Shaun Irwin}
+
+\maketitle
+
+\begin{abstract}
+A toolbox for simulating various state estimation problems.
+\end{abstract}
+
+\section{Introduction}
+Welcome to the Drone state Estimation Toolbox. The idea is to implement various vehicle models and states estimation algorithms in order to refresh my estimation knowledge.
+
+\section{Vehicle models}
+
+\subsection{Random walk drone}
+Simulates the position and velocity states of a "drone" hovering around in a random walk fashion. The velocity states are a random walk and the position states are the integral of velocity. In discritized form:
+\begin{equation}
+\begin{bmatrix}
+{P_X}_{k+1}\\
+{P_Y}_{k+1}\\
+{P_Z}_{k+1}\\
+{V_X}_{k+1}\\
+{V_Y}_{k+1}\\
+{V_Z}_{k+1}\\
+\end{bmatrix} = \begin{bmatrix}
+1 & 0 & 0 & \triangle T & 0 & 0 \\
+0 & 1 & 0 & 0 & \triangle T & 0 \\
+0 & 0 & 1 & 0 & 0 & \triangle T \\
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 \\
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+{P_X}_{k}\\
+{P_Y}_{k}\\
+{P_Z}_{k}\\
+{V_X}_{k}\\
+{V_Y}_{k}\\
+{V_Z}_{k}\\
+\end{bmatrix}
++
+\begin{bmatrix}
+0 & 0 & 0 \\
+0 & 0 & 0 \\
+0 & 0 & 0 \\
+\triangle T & 0 & 0 \\
+0 & \triangle T & 0 \\
+0 & 0 & \triangle T \\
+\end{bmatrix}
+\cdot
+\mathbf{w}
+\end{equation}
+where \(\triangle T\) is the simulation timestep and \(\mathbf{w}\) is Gaussian distributed white noise.
+
+\section{Conclusion}
+I hope this could be of use to anybody. Let me know if you spot any issues and feel free to submit a pull request.
+
+\end{document}
