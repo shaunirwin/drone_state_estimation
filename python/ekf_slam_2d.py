@@ -4,6 +4,7 @@ import numpy as np
 import random
 from matplotlib import pyplot as plt
 import matplotlib.transforms as mtransforms
+import time
 
 from python.lib.robot import move
 from python.lib.sensors import observe_range_bearing
@@ -48,6 +49,7 @@ def display(r, landmarks, raw_measurements, sim_time):
     plt.ylabel("y")
     plt.title("Time: {}".format(sim_time))
     plt.grid()
+    plt.axis('equal')
     plt.show()
 
 
@@ -87,13 +89,27 @@ def main():
 
     # simulate robot
     for i in range(int(sim_duration / time_step)):
-        # generate control input (for now just try drive straight, ignoring perturbations)
-        u = [2. * time_step, 0]
+        t_start = time.time()
 
-        # generate perturbation
-        d_alpha = d_alpha + u_alpha_stddev * np.random.randn()
-        n = [u_x_stddev * np.random.randn(), d_alpha]
-        # n = [0, 0]
+        # generate control input
+        control_input_type = "circle_without_noise"
+
+        if control_input_type == "straight_with_noise":
+            u = [2. * time_step, 0]
+
+            # generate perturbation
+            d_alpha = d_alpha + u_alpha_stddev * np.random.randn()
+            n = [u_x_stddev * np.random.randn(), d_alpha]
+        elif control_input_type == "straight_without_noise":
+            u = [2. * time_step, 0]
+
+            # generate perturbation
+            n = [0, 0]
+        elif control_input_type == "circle_without_noise":
+            u = [2. * time_step, np.deg2rad(15.) * time_step]
+            n = [0, 0]
+        else:
+            raise ValueError("Use valid control input motion type")
 
         # move robot
         r = move(r, u, n)
@@ -103,6 +119,8 @@ def main():
         p_robot_world_true = np.array([r[0], r[1]])
         raw_measurements = [observe_range_bearing(R_true, p_robot_world_true, landmarks[j, :])
                             for j in range(landmarks.shape[0])]
+
+        print(time.time() - t_start)
 
         # plot robot and map
         if i % 5 == 0:
