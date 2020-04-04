@@ -4,3 +4,4 @@ build
 *.pdf
 *.synctex.gz
 .idea
+__pycache__

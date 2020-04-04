@@ -30,7 +30,7 @@ def display(r, landmarks):
     # plot landmarks
     plt.plot(landmarks[:, 0], landmarks[:, 1], "xb")
 
-    # TODO: plot landmark IDs o help with debugging sensor readings
+    # TODO: plot landmark IDs to help with debugging sensor readings
 
     plt.xlabel("x")
     plt.ylabel("y")
@@ -75,13 +75,15 @@ def main():
         u = [1. * time_step, 0]
 
         # generate perturbation
-        n = [u_x_stddev * np.random.randn(), u_alpha_stddev * np.random.randn()]
+        # n = [u_x_stddev * np.random.randn(), u_alpha_stddev * np.random.randn()]
+        n = [0, 0]
 
         # move robot
         r = move(r, u, n)
 
         # plot robot and map
-        if i % 10 == 0:
+        if i % 1 == 0:
+            print(i, "current pose:", r, ", control input:", u, ", noise:", n)
             display(r, landmarks)
 
 
