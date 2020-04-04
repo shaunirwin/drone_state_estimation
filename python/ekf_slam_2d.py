@@ -7,12 +7,13 @@ from matplotlib import pyplot as plt
 from python.lib.robot import move
 
 
-def display(r, landmarks):
+def display(r, landmarks, sim_time):
     """
     Display robot and landmarks
 
     :param r: robot pose
     :param landmarks: list of landmark locations
+    :param sim_time: simulation time
     """
 
     plt.figure()
@@ -34,6 +35,7 @@ def display(r, landmarks):
 
     plt.xlabel("x")
     plt.ylabel("y")
+    plt.title("Time: {}".format(sim_time))
     plt.grid()
     plt.show()
 
@@ -82,9 +84,9 @@ def main():
         r = move(r, u, n)
 
         # plot robot and map
-        if i % 1 == 0:
+        if i % 10 == 0:
             print(i, "current pose:", r, ", control input:", u, ", noise:", n)
-            display(r, landmarks)
+            display(r, landmarks, i)
 
 
 if __name__ == "__main__":
