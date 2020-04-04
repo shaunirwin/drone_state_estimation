@@ -31,42 +31,42 @@ def test_robot_move_forward_from_non_zero_position_when_applying_forward_control
 def test_robot_move_right_from_non_zero_position_when_applying_right_control_input_without_noise():
     x, y, alpha = 1., 3., 0.
     r = np.array([x, y, alpha])
-    u = np.array([1, -90.])
+    u = np.array([1, np.deg2rad(-90.)])
     n = np.array([0, 0.])
 
     r_new = move(r, u, n)
 
-    assert assert_array_equal(r_new, [1., 2., -90.]) is None
+    assert assert_array_equal(r_new, [1., 2., np.deg2rad(-90.)]) is None
 
 
 def test_robot_move_left_from_non_zero_position_when_applying_left_control_input_without_noise():
     x, y, alpha = 1., 3., 0.
     r = np.array([x, y, alpha])
-    u = np.array([1, 90.])
+    u = np.array([1, np.deg2rad(90.)])
     n = np.array([0, 0.])
 
     r_new = move(r, u, n)
 
-    assert assert_array_equal(r_new, [1., 4., 90.]) is None
+    assert assert_array_equal(r_new, [1., 4., np.deg2rad(90.)]) is None
 
 
 def test_robot_move_forward_from_non_zero_position_and_45_deg_angle_when_applying_forward_control_input_without_noise():
-    x, y, alpha = 1., 3., 45.
+    x, y, alpha = 1., 3., np.deg2rad(45.)
     r = np.array([x, y, alpha])
     u = np.array([1, 0.])
     n = np.array([0, 0.])
 
     r_new = move(r, u, n)
 
-    assert assert_array_equal(r_new, [1.+1./np.sqrt(2), 3.+1./np.sqrt(2), 45.]) is None
+    assert assert_array_equal(r_new, [1.+1./np.sqrt(2), 3.+1./np.sqrt(2), np.deg2rad(45.)]) is None
 
 
 def test_robot_move_right_from_non_zero_position_and_45_deg_angle_when_applying_forward_control_input_without_noise():
-    x, y, alpha = 1., 3., 45.
+    x, y, alpha = 1., 3., np.deg2rad(45.)
     r = np.array([x, y, alpha])
-    u = np.array([1, -90.])
+    u = np.array([1, np.deg2rad(-90.)])
     n = np.array([0, 0.])
 
     r_new = move(r, u, n)
 
-    assert assert_array_equal(r_new, [1.+1./np.sqrt(2), 3.-1./np.sqrt(2), -45.]) is None
+    assert assert_array_equal(r_new, [1.+1./np.sqrt(2), 3.-1./np.sqrt(2), np.deg2rad(-45.)]) is None

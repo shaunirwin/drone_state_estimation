@@ -28,7 +28,7 @@ def rigid_transform_world_to_local(R, t, p_world):
     :return: p_local: x, y position in local reference frame
     """
 
-    p_local = R.T * (p_world - t)
+    p_local = np.dot(R.T, (p_world - t))
 
     return p_local
 
@@ -38,7 +38,7 @@ def rect_to_polar(p_rect):
     Convert (x, y) position vector in rectangular coordinates to (rho, psi) polar coordinate vector
 
     :param p_rect: (x, y) position vector in rectangular coordinates
-    :return: (rho, psi) polar coordinate vector
+    :return: (rho, psi) polar coordinate vector [m], [rad]
     """
 
     x, y = p_rect
@@ -63,15 +63,13 @@ def polar_to_rect(p_polar):
     return np.array([x, y])
 
 
-def angle_to_rotation_matrix(angle_deg):
+def angle_to_rotation_matrix(angle_rad):
     """
     Construct 2x2 rotation matrix from angle
 
-    :param angle_deg: angle [degrees]
+    :param angle_rad: angle [radians]
     :return: rotation matrix
     """
-
-    angle_rad = np.deg2rad(angle_deg)
 
     return np.array([[np.cos(angle_rad), -np.sin(angle_rad)],
                      [np.sin(angle_rad), np.cos(angle_rad)]])

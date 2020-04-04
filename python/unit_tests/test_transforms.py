@@ -21,7 +21,7 @@ def test_rigid_transform_local_to_world_when_rotation_is_zero_and_position_is_no
 
 
 def test_rigid_transform_local_to_world_when_rotation_is_180_deg_and_position_is_non_zero():
-    R = angle_to_rotation_matrix(180)
+    R = angle_to_rotation_matrix(np.deg2rad(180.))
     t = np.array([3.5, -4.])
     p_local = np.array([1., 2.])
 
@@ -33,4 +33,4 @@ def test_angle_to_rotation_matrix_if_angle_is_zero():
 
 
 def test_angle_to_rotation_matrix_if_angle_is_180_deg():
-    assert assert_array_almost_equal(angle_to_rotation_matrix(180), np.array([[-1, 0], [0, -1.]])) is None
+    assert assert_array_almost_equal(angle_to_rotation_matrix(np.deg2rad(180.)), np.array([[-1, 0], [0, -1.]])) is None
