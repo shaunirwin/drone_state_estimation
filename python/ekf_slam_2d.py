@@ -7,16 +7,17 @@ import matplotlib.transforms as mtransforms
 import time
 
 from python.lib.robot import move
-from python.lib.sensors import observe_range_bearing
+from python.lib.sensors import observe_range_bearing, inv_observe_range_bearing
 from python.lib.transforms import angle_to_rotation_matrix
 
 
-def display(r, landmarks, raw_measurements, sim_time):
+def display(r, landmarks_true, landmarks_est, raw_measurements, sim_time):
     """
     Display robot and landmarks
 
     :param r: robot pose
-    :param landmarks: list of landmark locations
+    :param landmarks_true: list of true landmark locations
+    :param landmarks_est: list of estimated landmark locations
     :param raw_measurements: sensor measurements of landmarks
     :param sim_time: simulation time
     """
@@ -36,12 +37,17 @@ def display(r, landmarks, raw_measurements, sim_time):
     # plot landmarks
     trans_offset = mtransforms.offset_copy(plt.gca().transData, fig=fig, x=0.05, y=0.10, units='inches')
 
-    for j in range(landmarks.shape[0]):
-        landmk_x, landmk_y = landmarks[j, 0], landmarks[j, 1]
+    for j in range(landmarks_true.shape[0]):
+        # plot true landmarks
+        landmk_x, landmk_y = landmarks_true[j, 0], landmarks_true[j, 1]
         meas_dist, meas_angle = raw_measurements[j]
         plt.plot(landmk_x, landmk_y, "xb")
         plt.text(landmk_x, landmk_y, '({dist:0.2f},{angle:0.1f})'.format(dist=meas_dist, angle=np.rad2deg(meas_angle)),
                  transform=trans_offset)
+
+        # plot estimated landmarks
+        landmk_x_est, landmk_y_est = landmarks_est[j]
+        plt.plot(landmk_x_est, landmk_y_est, ".g")
 
     # TODO: plot landmark IDs to help with debugging sensor readings
 
@@ -83,9 +89,9 @@ def main():
     min_y = 0.
     max_y = 10.
     num_landmarks = 6
-    landmarks = np.random.random_sample((num_landmarks, 2))
-    landmarks[:, 0] = min_x + landmarks[:, 0] * (max_x - min_x)
-    landmarks[:, 1] = min_y + landmarks[:, 1] * (max_y - min_y)
+    landmarks_true = np.random.random_sample((num_landmarks, 2))
+    landmarks_true[:, 0] = min_x + landmarks_true[:, 0] * (max_x - min_x)
+    landmarks_true[:, 1] = min_y + landmarks_true[:, 1] * (max_y - min_y)
 
     # simulate robot
     for i in range(int(sim_duration / time_step)):
@@ -117,15 +123,18 @@ def main():
         # sensor readings of environment
         R_true = angle_to_rotation_matrix(r[2])
         p_robot_world_true = np.array([r[0], r[1]])
-        raw_measurements = [observe_range_bearing(R_true, p_robot_world_true, landmarks[j, :])
-                            for j in range(landmarks.shape[0])]
+        raw_measurements = [observe_range_bearing(R_true, p_robot_world_true, landmarks_true[j, :])
+                            for j in range(landmarks_true.shape[0])]
+
+        # estimated landmark positions (by using estimated robot pose and inverse sensor measurements)
+        landmarks_est = [inv_observe_range_bearing(R_true, p_robot_world_true, m) for m in raw_measurements]
 
         print(time.time() - t_start)
 
         # plot robot and map
         if i % 5 == 0:
             print(i, "current pose:", r, ", control input:", u, ", noise:", n)
-            display(r, landmarks, raw_measurements, i)
+            display(r, landmarks_true, landmarks_est, raw_measurements, i)
 
 
 if __name__ == "__main__":
