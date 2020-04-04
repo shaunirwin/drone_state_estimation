@@ -49,7 +49,7 @@ def main():
     time_step = 0.020
 
     # measurement update period [s]
-    measurement_period = 0.1
+    measurement_period = 0.5
 
     # total simulation duration [s]
     sim_duration = 5.
@@ -57,9 +57,12 @@ def main():
     # initial robot pose (x [m]; y [m]; alpha [deg])
     r = [0., 0., 90.]
 
+    # angular_velocity [deg/sec]. Used to simulate random walk on the angle control
+    d_alpha = 0
+
     # process noise (for control input [x; alpha])
-    u_x_stddev = 0.05 * time_step       # [m]
-    u_alpha_stddev = 4. * time_step     # [deg]
+    u_x_stddev = 0.0 * time_step       # [m]
+    u_alpha_stddev = 4.0 * time_step     # [deg]
 
     # landmarks ([meters])
     min_x = -5.
@@ -74,17 +77,18 @@ def main():
     # simulate robot
     for i in range(int(sim_duration / time_step)):
         # generate control input (for now just try drive straight, ignoring perturbations)
-        u = [1. * time_step, 0]
+        u = [2. * time_step, 0]
 
         # generate perturbation
-        # n = [u_x_stddev * np.random.randn(), u_alpha_stddev * np.random.randn()]
-        n = [0, 0]
+        d_alpha = d_alpha + u_alpha_stddev * np.random.randn()
+        n = [u_x_stddev * np.random.randn(), d_alpha]
+        # n = [0, 0]
 
         # move robot
         r = move(r, u, n)
 
         # plot robot and map
-        if i % 10 == 0:
+        if i % 5 == 0:
             print(i, "current pose:", r, ", control input:", u, ", noise:", n)
             display(r, landmarks, i)
 
