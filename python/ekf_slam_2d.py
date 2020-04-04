@@ -9,6 +9,7 @@ import time
 from python.lib.robot import move
 from python.lib.sensors import observe_range_bearing, inv_observe_range_bearing
 from python.lib.transforms import angle_to_rotation_matrix
+from python.lib.ekf import EKFSLAM
 
 
 def display(r, landmarks_true, landmarks_est, raw_measurements, sim_time):
@@ -74,7 +75,7 @@ def main():
     sim_duration = 5.
 
     # initial robot pose (x [m]; y [m]; alpha [deg])
-    r = [0., 0., np.deg2rad(90.)]
+    r_true = [0., 0., np.deg2rad(90.)]
 
     # angular_velocity [rad/sec]. Used to simulate random walk on the angle control
     d_alpha = 0
@@ -92,6 +93,11 @@ def main():
     landmarks_true = np.random.random_sample((num_landmarks, 2))
     landmarks_true[:, 0] = min_x + landmarks_true[:, 0] * (max_x - min_x)
     landmarks_true[:, 1] = min_y + landmarks_true[:, 1] * (max_y - min_y)
+
+    # EKF-SLAM estimator
+
+    est = EKFSLAM()
+    est.X[:2] = r_true      # we know the true robot pose initially
 
     # simulate robot
     for i in range(int(sim_duration / time_step)):
@@ -118,11 +124,11 @@ def main():
             raise ValueError("Use valid control input motion type")
 
         # move robot
-        r = move(r, u, n)
+        r_true = move(r_true, u, n)
 
         # sensor readings of environment
-        R_true = angle_to_rotation_matrix(r[2])
-        p_robot_world_true = np.array([r[0], r[1]])
+        R_true = angle_to_rotation_matrix(r_true[2])
+        p_robot_world_true = np.array([r_true[0], r_true[1]])
         raw_measurements = [observe_range_bearing(R_true, p_robot_world_true, landmarks_true[j, :])
                             for j in range(landmarks_true.shape[0])]
 
@@ -133,8 +139,8 @@ def main():
 
         # plot robot and map
         if i % 5 == 0:
-            print(i, "current pose:", r, ", control input:", u, ", noise:", n)
-            display(r, landmarks_true, landmarks_est, raw_measurements, i)
+            print(i, "current pose:", r_true, ", control input:", u, ", noise:", n)
+            display(r_true, landmarks_true, landmarks_est, raw_measurements, i)
 
 
 if __name__ == "__main__":
