@@ -4,19 +4,22 @@ import numpy as np
 import random
 from matplotlib import pyplot as plt
 import matplotlib.transforms as mtransforms
+from matplotlib.patches import Ellipse
 import time
 
 from python.lib.robot import move
 from python.lib.sensors import observe_range_bearing, inv_observe_range_bearing
 from python.lib.transforms import angle_to_rotation_matrix
 from python.lib.ekf import EKFSLAM
+from python.lib.utils import confidence_ellipse
 
 
-def display(r, landmarks_true, landmarks_est, raw_measurements, sim_time):
+def display(r, estimator, landmarks_true, landmarks_est, raw_measurements, sim_time):
     """
     Display robot and landmarks
 
     :param r: robot pose
+    :param estimator: estimator object, which contains state estimates and state covariance matrix
     :param landmarks_true: list of true landmark locations
     :param landmarks_est: list of estimated landmark locations
     :param raw_measurements: sensor measurements of landmarks
@@ -35,6 +38,10 @@ def display(r, landmarks_true, landmarks_est, raw_measurements, sim_time):
     plt.plot(r_x, r_y, ".r")
     plt.plot([r_x, r_x + length * np.cos(r_alpha)], [r_y, r_y + length * np.sin(r_alpha)], "-r")
 
+    # plot 2 sigma robot state uncertainty bounds
+    confidence_ellipse(mean=estimator.X[:2], cov=estimator.P[:2, :2], ax=plt.gca(), n_std=2, facecolor="none", edgecolor="k", alpha=0.4)
+    # confidence_ellipse(mean=estimator.X[:2], cov=np.array([[0.3, 0.], [0., 0.2]]), ax=plt.gca(), n_std=2, facecolor="none", edgecolor="k", alpha=0.4)
+
     # plot landmarks
     trans_offset = mtransforms.offset_copy(plt.gca().transData, fig=fig, x=0.05, y=0.10, units='inches')
 
@@ -43,14 +50,13 @@ def display(r, landmarks_true, landmarks_est, raw_measurements, sim_time):
         landmk_x, landmk_y = landmarks_true[j, 0], landmarks_true[j, 1]
         meas_dist, meas_angle = raw_measurements[j]
         plt.plot(landmk_x, landmk_y, "xb")
-        plt.text(landmk_x, landmk_y, '({dist:0.2f},{angle:0.1f})'.format(dist=meas_dist, angle=np.rad2deg(meas_angle)),
+        plt.text(landmk_x, landmk_y, '{landmk_id}: ({dist:0.2f},{angle:0.1f})'.
+                 format(landmk_id=j, dist=meas_dist, angle=np.rad2deg(meas_angle)),
                  transform=trans_offset)
 
         # plot estimated landmarks
         landmk_x_est, landmk_y_est = landmarks_est[j]
         plt.plot(landmk_x_est, landmk_y_est, ".g")
-
-    # TODO: plot landmark IDs to help with debugging sensor readings
 
     plt.xlabel("x")
     plt.ylabel("y")
@@ -81,7 +87,7 @@ def main():
     d_alpha = 0
 
     # process noise (for control input [x; alpha])
-    u_x_stddev = 0.0 * time_step                    # [m]
+    u_x_stddev = 2.0 * time_step                    # [m]
     u_alpha_stddev = np.deg2rad(4.0 * time_step)    # [rad]
 
     # landmarks ([meters])
@@ -97,7 +103,9 @@ def main():
     # EKF-SLAM estimator
 
     est = EKFSLAM()
-    est.X[:2] = r_true      # we know the true robot pose initially
+    est.X[:3] = r_true      # we know the true robot pose initially
+    est.P = np.zeros((3, 3)) * 1.
+    est.N = np.array([[u_x_stddev**2, 0], [0, u_alpha_stddev**2]])
 
     # simulate robot
     for i in range(int(sim_duration / time_step)):
@@ -126,6 +134,11 @@ def main():
         # move robot
         r_true = move(r_true, u, n)
 
+        # propagate EKF
+        est.state_propagation(u)
+
+        print("States:", est.X, "\nP:", est.P)
+
         # sensor readings of environment
         R_true = angle_to_rotation_matrix(r_true[2])
         p_robot_world_true = np.array([r_true[0], r_true[1]])
@@ -140,7 +153,7 @@ def main():
         # plot robot and map
         if i % 5 == 0:
             print(i, "current pose:", r_true, ", control input:", u, ", noise:", n)
-            display(r_true, landmarks_true, landmarks_est, raw_measurements, i)
+            display(r_true, est, landmarks_true, landmarks_est, raw_measurements, i)
 
 
 if __name__ == "__main__":
