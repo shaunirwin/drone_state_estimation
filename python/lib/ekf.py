@@ -99,3 +99,14 @@ class EKFSLAM:
 
         # transpose to ensure positive semi definite (NB: we could also store just a triangular matrix instead)
         self.P = (self.P + self.P.T) / 2
+
+    def measurement_update(self, y_meas, landmark_index):
+        """
+        Perform measurement update with selected landmark
+
+        :param y_meas:
+        :param landmark_index:
+        :return:
+        """
+
+        pass

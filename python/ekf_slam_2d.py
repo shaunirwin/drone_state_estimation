@@ -28,21 +28,24 @@ def display(r, estimator, landmarks_true, landmarks_est, raw_measurements, sim_t
 
     fig = plt.figure()
 
-    # plot robot
+    # plot true robot states
 
     length = 0.8
-    r_x = r[0]
-    r_y = r[1]
-    r_alpha = r[2]
-
+    r_x, r_y, r_alpha = r
     plt.plot(r_x, r_y, ".r")
     plt.plot([r_x, r_x + length * np.cos(r_alpha)], [r_y, r_y + length * np.sin(r_alpha)], "-r")
 
+    # plot estimated robot states
+
+    r_x_est, r_y_est, r_alpha_est = estimator.X[:3]
+    plt.plot(r_x_est, r_y_est, ".g")
+    plt.plot([r_x_est, r_x_est + length * np.cos(r_alpha_est)], [r_y_est, r_y_est + length * np.sin(r_alpha_est)], "-g")
+
     # plot 2 sigma robot state uncertainty bounds
-    confidence_ellipse(mean=estimator.X[:2], cov=estimator.P[:2, :2], ax=plt.gca(), n_std=2, facecolor="none", edgecolor="k", alpha=0.4)
+    confidence_ellipse(mean=estimator.X[:2], cov=estimator.P[:2, :2], ax=plt.gca(), n_std=2, facecolor="none", edgecolor="g", alpha=0.4)
     # confidence_ellipse(mean=estimator.X[:2], cov=np.array([[0.3, 0.], [0., 0.2]]), ax=plt.gca(), n_std=2, facecolor="none", edgecolor="k", alpha=0.4)
 
-    # plot landmarks
+    # plot true landmarks
     trans_offset = mtransforms.offset_copy(plt.gca().transData, fig=fig, x=0.05, y=0.10, units='inches')
 
     for j in range(landmarks_true.shape[0]):
@@ -112,9 +115,14 @@ def main():
         t_start = time.time()
 
         # generate control input
-        control_input_type = "circle_without_noise"
+        control_input_type = "straight_with_noise"
 
         if control_input_type == "straight_with_noise":
+            u = [2. * time_step, 0]
+
+            # generate perturbation
+            n = [u_x_stddev * np.random.randn(), d_alpha]
+        elif control_input_type == "straight_with_random_walk_angle_noise":
             u = [2. * time_step, 0]
 
             # generate perturbation
@@ -125,6 +133,9 @@ def main():
 
             # generate perturbation
             n = [0, 0]
+        elif control_input_type == "circle_with_noise":
+            u = [2. * time_step, np.deg2rad(15.) * time_step]
+            n = [u_x_stddev * np.random.randn(), d_alpha]
         elif control_input_type == "circle_without_noise":
             u = [2. * time_step, np.deg2rad(15.) * time_step]
             n = [0, 0]
