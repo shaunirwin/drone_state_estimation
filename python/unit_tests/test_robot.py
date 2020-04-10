@@ -1,4 +1,4 @@
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 import numpy as np
 from pytest import mark
 
@@ -47,7 +47,7 @@ def test_robot_move_left_from_non_zero_position_when_applying_left_control_input
 
     r_new = move(r, u, n)
 
-    assert assert_array_equal(r_new, [1., 4., np.deg2rad(90.)]) is None
+    assert assert_array_equal(r_new, np.array([1., 4., np.deg2rad(90.)])) is None
 
 
 def test_robot_move_forward_from_non_zero_position_and_45_deg_angle_when_applying_forward_control_input_without_noise():
@@ -58,7 +58,7 @@ def test_robot_move_forward_from_non_zero_position_and_45_deg_angle_when_applyin
 
     r_new = move(r, u, n)
 
-    assert assert_array_equal(r_new, [1.+1./np.sqrt(2), 3.+1./np.sqrt(2), np.deg2rad(45.)]) is None
+    assert assert_array_equal(r_new, np.array([1.+1./np.sqrt(2), 3.+1./np.sqrt(2), np.deg2rad(45.)])) is None
 
 
 def test_robot_move_right_from_non_zero_position_and_45_deg_angle_when_applying_forward_control_input_without_noise():
@@ -69,4 +69,4 @@ def test_robot_move_right_from_non_zero_position_and_45_deg_angle_when_applying_
 
     r_new = move(r, u, n)
 
-    assert assert_array_equal(r_new, [1.+1./np.sqrt(2), 3.-1./np.sqrt(2), np.deg2rad(-45.)]) is None
+    assert assert_array_equal(r_new, np.array([1.+1./np.sqrt(2), 3.-1./np.sqrt(2), np.deg2rad(-45.)])) is None

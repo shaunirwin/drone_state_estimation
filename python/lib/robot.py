@@ -1,6 +1,6 @@
 # robot motion
 
-import numpy as np
+import jax.numpy as np
 
 from python.lib.transforms import rigid_transform_local_to_world, angle_to_rotation_matrix
 
@@ -40,7 +40,7 @@ def move(r, u, n):
     #                                                       [d_x_local, 0],
     #                                                       [0, 0])
 
-    r_new = [x + d_x_world, y + d_y_world, alpha_new]
+    r_new = np.array([x + d_x_world, y + d_y_world, alpha_new])
     # r_new = [d_x_world, d_y_world, alpha + d_alpha]
 
     return r_new

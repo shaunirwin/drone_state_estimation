@@ -1,10 +1,10 @@
 # This script simulates a robot performing SLAM in 2D
 
 import numpy as np
+from jax.config import config
 import random
 from matplotlib import pyplot as plt
 import matplotlib.transforms as mtransforms
-from matplotlib.patches import Ellipse
 import time
 
 from python.lib.robot import move
@@ -12,6 +12,9 @@ from python.lib.sensors import observe_range_bearing, inv_observe_range_bearing
 from python.lib.transforms import angle_to_rotation_matrix
 from python.lib.ekf import EKFSLAM
 from python.lib.utils import confidence_ellipse
+
+# check that JAX is set to 64-bit precision
+assert config.values["jax_enable_x64"]
 
 
 def display(r, estimator, landmarks_true, landmarks_est, raw_measurements, sim_time):
@@ -106,9 +109,9 @@ def main():
     # EKF-SLAM estimator
 
     est = EKFSLAM()
-    est.X[:3] = r_true      # we know the true robot pose initially
+    est.X = np.concatenate([r_true, est.X[3:]])     # we know the true robot pose initially
     est.P = np.zeros((3, 3)) * 1.
-    est.N = np.array([[u_x_stddev**2, 0], [0, u_alpha_stddev**2]])
+    est.Q = np.array([[u_x_stddev ** 2, 0], [0, u_alpha_stddev ** 2]])
 
     # simulate robot
     for i in range(int(sim_duration / time_step)):
@@ -146,7 +149,7 @@ def main():
         r_true = move(r_true, u, n)
 
         # propagate EKF
-        est.state_propagation(u)
+        est.state_and_state_cov_propagation(u)
 
         print("States:", est.X, "\nP:", est.P)
 

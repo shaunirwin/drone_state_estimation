@@ -1,6 +1,6 @@
 # Various transforms between reference frames and coordinate systems
 
-import numpy as np
+import jax.numpy as np
 
 
 def rigid_transform_local_to_world(R, t, p_local):
@@ -27,6 +27,12 @@ def rigid_transform_world_to_local(R, t, p_world):
     :param p_world: x, y position in world reference frame
     :return: p_local: x, y position in local reference frame
     """
+
+    if len(t) != 2:
+        raise ValueError("t must have length 2")
+
+    if len(p_world) != 2:
+        raise ValueError("p_world must have length 2")
 
     p_local = np.dot(R.T, (p_world - t))
 

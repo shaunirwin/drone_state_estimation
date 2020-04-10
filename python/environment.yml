@@ -5,3 +5,6 @@ dependencies:
   - matplotlib
   - pytest
   - sympy
+  - pip:
+    - jax
+    - jaxlib

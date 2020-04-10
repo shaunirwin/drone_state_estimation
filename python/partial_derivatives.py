@@ -28,11 +28,11 @@ def state_transition_function_jacobians():
                   [X_r_new[1]],
                   [alpha_new]])
 
-    # Jacobian of f_r w.r.t X_r (the robot pose)
+    # -----------  Jacobian of f_r w.r.t X_r (the robot pose) --------------
 
     d_f_r_by_X_r = f_r.jacobian(X_r)
 
-    # Jacobian of f_r w.r.t N (the noise perturbation)
+    # ------------ Jacobian of f_r w.r.t N (the noise perturbation) --------------
 
     d_f_r_by_N = f_r.jacobian(N)
 
