@@ -1,6 +1,13 @@
 # robot motion
 
-import jax.numpy as np
+import os
+if os.environ.get("USE_JAX", False):
+    import jax.numpy as np
+    from jax.config import config
+    # check that JAX is set to 64-bit precision
+    assert config.values["jax_enable_x64"]
+else:
+    import numpy as np
 
 from python.lib.transforms import rigid_transform_local_to_world, angle_to_rotation_matrix
 

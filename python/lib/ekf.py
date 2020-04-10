@@ -1,13 +1,16 @@
-import jax.numpy as np
-from jax.config import config
+import os
+if os.environ.get("USE_JAX", False):
+    import jax.numpy as np
+    from jax.config import config
+    # check that JAX is set to 64-bit precision
+    assert config.values["jax_enable_x64"]
+else:
+    import numpy as np
 from math import sqrt
 
 from python.lib.robot import move
 from python.lib.sensors import observe_range_bearing, inv_observe_range_bearing
 from python.lib.transforms import angle_to_rotation_matrix
-
-# check that JAX is set to 64-bit precision
-assert config.values["jax_enable_x64"]
 
 
 class EKFSLAM:

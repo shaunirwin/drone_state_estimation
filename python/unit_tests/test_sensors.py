@@ -1,5 +1,12 @@
 # import numpy as np
-import jax.numpy as np
+import os
+if os.environ.get("USE_JAX", False):
+    import jax.numpy as np
+    from jax.config import config
+    # check that JAX is set to 64-bit precision
+    assert config.values["jax_enable_x64"]
+else:
+    import numpy as np
 from numpy.testing import assert_almost_equal
 
 from python.lib.sensors import observe_range_bearing, inv_observe_range_bearing

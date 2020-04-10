@@ -18,5 +18,8 @@ Run unit tests:
 ~~~
 # ensure JAX uses 64-bit precision instead of 32-bit:
 export JAX_ENABLE_X64=True
+export USE_JAX=True
 pytest python/unit_tests/
 ~~~
+We need to use Jax when running unit tests, since we use automatic differentiation to check Jacobians are calculated 
+correctly.
