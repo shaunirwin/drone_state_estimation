@@ -154,13 +154,12 @@ def main():
         print("States:", est.X, "\nP:", est.P)
 
         # sensor readings of environment
-        R_true = angle_to_rotation_matrix(r_true[2])
         p_robot_world_true = np.array([r_true[0], r_true[1]])
-        raw_measurements = [observe_range_bearing(R_true, p_robot_world_true, landmarks_true[j, :])
-                            for j in range(landmarks_true.shape[0])]
+        raw_measurements = [observe_range_bearing(r_true[2], p_robot_world_true, landmarks_true[j, :])
+                            for j in range(landmarks_true.shape[0])]        # TODO: add some noise to the measurements
 
         # estimated landmark positions (by using estimated robot pose and inverse sensor measurements)
-        landmarks_est = [inv_observe_range_bearing(R_true, p_robot_world_true, m) for m in raw_measurements]
+        landmarks_est = [inv_observe_range_bearing(r_true[2], p_robot_world_true, m) for m in raw_measurements]        # TODO: use estimated robot pose?
 
         print(time.time() - t_start)
 
