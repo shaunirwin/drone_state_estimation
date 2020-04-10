@@ -6,11 +6,9 @@ if os.environ.get("USE_JAX", False):
     assert config.values["jax_enable_x64"]
 else:
     import numpy as np
-from math import sqrt
 
 from python.lib.robot import move
-from python.lib.sensors import observe_range_bearing, inv_observe_range_bearing
-from python.lib.transforms import angle_to_rotation_matrix
+from python.lib.sensors import RangeBearingSensor
 
 
 class EKFSLAM:
@@ -113,11 +111,6 @@ class EKFSLAM:
                         [np.sin(alpha_n + alpha_r + alpha_u),  (x_n + x_u)*np.cos(alpha_n + alpha_r + alpha_u)],
                         [0, 1]])
 
-    def state_propagation(self, U):
-        """
-        Propagate the states and state covariance matrix forward one time step using the control input
-
-    @staticmethod
     @staticmethod
     def state_propagation(X, U, n=None):
         """
@@ -156,7 +149,7 @@ class EKFSLAM:
 
         # The full state cov matrix propagation can be done as follows:
         # P_new = np.dot(np.dot(F_x, P), F_x.T) + np.dot(np.dot(F_n, N), F_n.T)
-        # However, this is less efficient that way due to many zeros, since since the landmarks do not move their
+        # However, this is less efficient that way due to many zeros, since the landmarks do not move their
         # covariance is always zero and are unaffected by process noise. We can partition P as follows:
         # P = [[P_rr, P_rm], [P_mr, P_mm]]. P_mm will always be zero.
 
@@ -184,15 +177,33 @@ class EKFSLAM:
             self.P[3:, :2] = P_rm_new.T
 
         # transpose to ensure positive semi definite (NB: we could also store just a triangular matrix instead)
-        self.P = (self.P + self.P.T) / 2
+        self.P = (self.P + self.P.T) / 2    # TODO: should use 0.5P + o.5P.T instead
 
-    def measurement_update(self, y_meas, landmark_index):
+    def measurement_update_range_bearing(self, y_meas_i, i):
         """
-        Perform measurement update with selected landmark
+        Perform measurement update with selected landmark using range-bearing sensor
 
-        :param y_meas:
-        :param landmark_index:
+        :param y_meas_i: measurement of ith landmark
+        :param i: index of the landmark that the measurement corresponds to
         :return:
         """
 
-        pass
+        # TODO: should create a hash code/ID for each landmark so that we can look up its position in the state vector
+
+        # calculate innovation residual for landmark i
+        L_i_est = self.X[3 + 2*i: 3 + 2*(i+1)]      # get states of this landmark
+        x_r, y_r, alpha_r = self.X[:3]
+        # R = angle_to_rotation_matrix(alpha_r)
+        h_i = RangeBearingSensor.observe_range_bearing(alpha_r, np.array([x_r, y_r]), L_i_est)       # TODO: NB: this was initially calculated using inv_observe_range_bearing instead of observe_range_bearing. Need to recalculate!
+        z_i = y_meas_i - h_i
+        
+        # calculate innovation covariance
+        H_R = self.jacobian_H_X_r(x_r=x_r, y_r=y_r, alpha_r=alpha_r, l_i_x=L_i_est[0], l_i_y=L_i_est[1])
+        H_L_i = self.jacobian_H_L_i(x_r=x_r, y_r=y_r, alpha_r=alpha_r, l_i_x=L_i_est[0], l_i_y=L_i_est[1])
+        H = np.array([H_R, H_L_i])
+        P_innov = np.array([[], []])
+        Z_i = np.dot(np.dot(H, P_innov), H.T) + self.R
+
+        # calculate Kalman gains
+        # K = np.zeros((3 + ))
+        

@@ -8,8 +8,7 @@ import matplotlib.transforms as mtransforms
 import time
 
 from python.lib.robot import move
-from python.lib.sensors import observe_range_bearing, inv_observe_range_bearing
-from python.lib.transforms import angle_to_rotation_matrix
+from python.lib.sensors import RangeBearingSensor as rbs
 from python.lib.ekf import EKFSLAM
 from python.lib.utils import confidence_ellipse
 
@@ -96,12 +95,16 @@ def main():
     u_x_stddev = 2.0 * time_step                    # [m]
     u_alpha_stddev = np.deg2rad(4.0 * time_step)    # [rad]
 
+    # measurement noise
+    range_meas_stddev = 0.1                 # [m]
+    bearing_meas_stddev = np.deg2rad(5.)    # [rad]
+
     # landmarks ([meters])
     min_x = -5.
     max_x = 5.
     min_y = 0.
     max_y = 10.
-    num_landmarks = 6
+    num_landmarks = 2
     landmarks_true = np.random.random_sample((num_landmarks, 2))
     landmarks_true[:, 0] = min_x + landmarks_true[:, 0] * (max_x - min_x)
     landmarks_true[:, 1] = min_y + landmarks_true[:, 1] * (max_y - min_y)
@@ -112,6 +115,7 @@ def main():
     est.X = np.concatenate([r_true, est.X[3:]])     # we know the true robot pose initially
     est.P = np.zeros((3, 3)) * 1.
     est.Q = np.array([[u_x_stddev ** 2, 0], [0, u_alpha_stddev ** 2]])
+    est.R = np.array([[range_meas_stddev ** 2, 0], [0, bearing_meas_stddev ** 2]])
 
     # simulate robot
     for i in range(int(sim_duration / time_step)):
@@ -154,12 +158,15 @@ def main():
         print("States:", est.X, "\nP:", est.P)
 
         # sensor readings of environment
-        p_robot_world_true = np.array([r_true[0], r_true[1]])
-        raw_measurements = [observe_range_bearing(r_true[2], p_robot_world_true, landmarks_true[j, :])
+        raw_measurements = [rbs.observe_range_bearing(r_true, landmarks_true[j, :])
                             for j in range(landmarks_true.shape[0])]        # TODO: add some noise to the measurements
 
+        # measurement update of EKF
+        # TODO: need to first add the landmarks before we can update them
+        # [est.measurement_update_range_bearing(y, ii) for ii, y in enumerate(raw_measurements)]
+
         # estimated landmark positions (by using estimated robot pose and inverse sensor measurements)
-        landmarks_est = [inv_observe_range_bearing(r_true[2], p_robot_world_true, m) for m in raw_measurements]        # TODO: use estimated robot pose?
+        landmarks_est = [rbs.inv_observe_range_bearing(r_true, m) for m in raw_measurements]        # TODO: use estimated robot pose?
 
         print(time.time() - t_start)
 
